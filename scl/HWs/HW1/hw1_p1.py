@@ -25,11 +25,43 @@ def shubhams_fair_coin_generator():
     """
     toss = None
     num_biased_tosses = 0
+    while True:
+        t1 = biased_coin_generator()
+        t2 = biased_coin_generator()
 
-    ##############################
-    # ADD CODE HERE
-    raise NotImplementedError
-    ##############################
+        num_biased_tosses += 2
+
+        if t1 == t2:
+            continue
+
+        if t1 == 'H':
+            toss = 'H'
+        else:
+            toss = 'T'
+
+        break
+
+    return toss, num_biased_tosses
+
+
+def shubhams_fair_coin_generator_v2():
+    toss = None
+    num_biased_tosses = 0
+    tl = [biased_coin_generator()]
+    while True:
+        tl.append(biased_coin_generator())
+
+        t1, t2 = tl[-2], tl[-1]
+
+        if t1 == t2:
+            continue
+
+        if t1 == 'H':
+            toss = 'H'
+        else:
+            toss = 'T'
+
+        break
 
     return toss, num_biased_tosses
 
@@ -48,7 +80,8 @@ def test_shubhams_fair_coin_generator():
     tosses = []
     num_biased_tosses_list = []
     for _ in range(num_trials):
-        toss, num_biased_tosses = shubhams_fair_coin_generator()
+        # toss, num_biased_tosses = shubhams_fair_coin_generator()
+        toss, num_biased_tosses = shubhams_fair_coin_generator_v2()
 
         # check if the output is indeed in H,T
         assert toss in ["H", "T"]
@@ -62,11 +95,6 @@ def test_shubhams_fair_coin_generator():
     tosses_db = DataBlock(tosses)
     empirical_dist_tosses = tosses_db.get_empirical_distribution()
 
-    #############################################
-    # ADD CODE HERE
-    # 1. add test here to check if empirical_dist_tosses is close to being fair
-    # 2. add test to check if avg value of num_biased_tosses matches what you expect
-    # (both within a reasonable error range)
-    # You can use np.testing.assert_almost_equal() to check if two numbers are close to some error margin
-    raise NotImplementedError
-    #############################################
+    np.testing.assert_almost_equal(empirical_dist_tosses.probability('H'), 0.5, decimal=1)
+    np.testing.assert_almost_equal(empirical_dist_tosses.probability('T'), 0.5, decimal=1)
+    print(f'num biased tosses: {np.average(num_biased_tosses_list)}')

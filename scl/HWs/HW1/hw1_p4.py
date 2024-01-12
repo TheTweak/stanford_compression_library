@@ -39,13 +39,25 @@ class ShannonTreeEncoder(PrefixFreeEncoder):
 
         ############################################################
         # ADD CODE HERE
-        # NOTE: 
+        # NOTE:
         # - The utility functions ProbabilityDist.neg_log_probability
         # - scl.utils.bitarray_utils.uint_to_bitarray and scl.utils.bitarray_utils.bitarry_to_uint might be useful
+        # print(f"prob dist {sorted_prob_dist}")
+        i = -1
+        prev_l = 0
+        for s in sorted_prob_dist.alphabet:
+            raw_optimal_l = sorted_prob_dist.neg_log_probability(s)
+            optimal_l = math.ceil(raw_optimal_l)
+            if optimal_l != prev_l:
+                i += (1 << prev_l)
+            else:
+                i += 1
+            s_code = uint_to_bitarray(i, bit_width=optimal_l)
+            # print(f"opt_l={optimal_l} raw={raw_optimal_l} prev_l={prev_l} s_code={s_code} i={i}")
+            codebook[s] = s_code
+            prev_l = optimal_l
 
-        raise NotImplementedError
-
-        ############################################################
+        # print(f"codebook: {codebook}")
 
         return codebook
 
@@ -105,7 +117,6 @@ def test_shannon_tree_coding_specific_case():
     # NOTE -> this test must succeed with your implementation
     ############################################################
     # Add the computed expected codewords for distributions presented in part 1 to these list to improve the test
-    raise NotImplementedError
     ############################################################
 
     def test_encoded_symbol(prob_dist, expected_codeword_dict):
@@ -116,6 +127,15 @@ def test_shannon_tree_coding_specific_case():
         encoder = ShannonTreeEncoder(prob_dist)
         for s in prob_dist.prob_dict.keys():
             assert encoder.encode_symbol(s) == expected_codeword_dict[s]
+
+    distributions = [
+        ProbabilityDist({"A": 0.25, "B": 0.25, "C": 0.25, "D": 0.25}),
+        ProbabilityDist({"A": 0.5, "B": 0.25, "C": 0.12, "D": 0.13}),
+    ]
+    expected_codewords = [
+        {"A": BitArray("00"), "B": BitArray("01"), "C": BitArray("10"), "D": BitArray("11")},
+        {"A": BitArray("0"), "B": BitArray("10"), "C": BitArray("1110"), "D": BitArray("110")},
+    ]
 
     for i, prob_dist in enumerate(distributions):
         test_encoded_symbol(prob_dist, expected_codeword_dict=expected_codewords[i])
